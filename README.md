@@ -18,7 +18,7 @@ Token、插件包、启用状态和插件配置全部保存在应用数据目录
 - `cmd/`：可执行入口
 - `internal/`：平台核心、插件管理与 UI；旧思源直连适配器源码仅作迁移参考
 - `docs/`：架构、开发、第三方插件和思源说明
-- `docs/plugin-author-guide.md`：面向小白和 AI 的可插拔能力包开发、打包、安装和 GitHub 发布指南
+- `docs/plugin-author-guide.md`：面向 AI 的可插拔能力包开发、打包、安装和 GitHub 发布指南
 - `docs/fnos-trim-plugin.md`：fnOS trim-cli V2 预制连接器与双架构打包说明
 - `fpk/`：fnOS 包骨架（不含编译产物）
 - `sdk/plugin/`：第三方 Go 插件最小运行 SDK
