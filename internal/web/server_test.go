@@ -23,6 +23,15 @@ func TestTokenManagerIsASeparatePage(t *testing.T) {
 	if tokens.Code != http.StatusOK || !strings.Contains(tokens.Body.String(), `id="tokenSettings"`) || strings.Contains(tokens.Body.String(), `id="adminToken"`) {
 		t.Fatal("token manager page is missing")
 	}
+	if !strings.Contains(tokens.Body.String(), `id="tokenCount"`) {
+		t.Fatal("token manager page is missing token count")
+	}
+
+	about := httptest.NewRecorder()
+	h.ServeHTTP(about, httptest.NewRequest(http.MethodGet, "/api/about", nil))
+	if about.Code != http.StatusOK || !strings.Contains(about.Body.String(), `"currentVersion":"0.3.3"`) {
+		t.Fatalf("about=%d body=%s", about.Code, about.Body.String())
+	}
 }
 
 func TestPluginStatusAlwaysIncludesLatency(t *testing.T) {

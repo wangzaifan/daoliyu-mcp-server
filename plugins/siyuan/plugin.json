@@ -4,6 +4,8 @@
   "version": "0.2.0",
   "description": "通过思源官方 API 提供检索、沉淀、分类和关联能力，可独立停用和卸载。",
   "icon": "icon.png",
+  "repository": "https://github.com/wangzaifan/daoliyu-mcp-server",
+  "homepage": "https://b3log.org/siyuan/",
   "provider": "siyuan",
   "configSchema": {
     "type": "object",

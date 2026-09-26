@@ -18,7 +18,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-var version = "0.3.2"
+var version = "0.3.3"
 
 func main() {
 	port := flag.Int("port", envInt("DAOLIYU_MCP_PORT", 37421), "HTTP port")
@@ -48,7 +48,7 @@ func main() {
 		}
 		return
 	}
-	ui := (&web.Server{Store: store, Plugins: manager, Tokens: tokens}).Handler()
+	ui := (&web.Server{Store: store, Plugins: manager, Tokens: tokens, Version: version}).Handler()
 	mcpHandler := mcp.NewStreamableHTTPHandler(func(r *http.Request) *mcp.Server {
 		token, _ := tokens.Find(bearerValue(r))
 		return newMCPServer(manager, scopeSet(token.Scopes))

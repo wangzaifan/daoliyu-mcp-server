@@ -18,12 +18,14 @@ Token、插件包、启用状态和插件配置全部保存在应用数据目录
 - `cmd/`：可执行入口
 - `internal/`：平台核心、插件管理与 UI；旧思源直连适配器源码仅作迁移参考
 - `docs/`：架构、开发、第三方插件和思源说明
+- `docs/plugin-author-guide.md`：面向小白和 AI 的可插拔能力包开发、打包、安装和 GitHub 发布指南
 - `fpk/`：fnOS 包骨架（不含编译产物）
 - `sdk/plugin/`：第三方 Go 插件最小运行 SDK
 - `plugins/sisyphus/`：通用 MCP HTTP 形式的 Sisyphus connector
 - `plugins/siyuan/`：旧思源知识库直连适配器源码（不再随正式构建发布）
 - `siyuan-fpk/`：思源无头服务、Node 与本机 Sisyphus sidecar 的 fnOS FPK 骨架
 - `scripts/build-fpk.sh`：交叉编译 x86/ARM FPK 和 MCP 连接器 ZIP
+- `scripts/package-plugin.sh`：按插件清单和图标规则打包第三方能力 ZIP
 - `scripts/build-siyuan-fpk.sh`：从思源官方多架构镜像构建独立思源 FPK
 
 ## 当前边界

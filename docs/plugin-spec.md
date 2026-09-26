@@ -9,6 +9,8 @@
   "version": "0.1.0",
   "description": "示例插件",
   "icon": "icon.png",
+  "repository": "https://github.com/your-name/demo-plugin",
+  "homepage": "https://example.com/demo-plugin",
   "entry": "plugin",
   "provider": "",
   "configSchema": {"type":"object","properties":{"endpoint":{"type":"string","title":"服务地址"}}},
@@ -19,6 +21,10 @@
   }]
 }
 ```
+
+`repository` 和 `homepage` 只能是 `http` 或 `https` 地址，用于卡片上的外部链接。图标必须是 ZIP 根目录中的 PNG，正方形，64-512 像素，文件不超过 512 KiB。`provider` 属于宿主内置能力，第三方插件包不能填写。
+
+宿主固定 Token、权限、数据目录、生命周期、端口和网关边界；第三方只定义自己的 `tools`、`configSchema` 和业务实现。任何额外的 manifest 字段都不会获得宿主权限。
 
 平台 provider 插件也使用同一份 manifest；它们仍然可以像普通插件一样停用或卸载。思源正式接入使用 `mcp-http` connector，思源本体和 Sisyphus 运行在独立的思源 FPK 内。
 

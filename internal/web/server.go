@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"io/fs"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/daoliyu/daoliyu-mcp/internal/app"
@@ -18,6 +20,7 @@ type Server struct {
 	Store   *app.Store
 	Plugins *plugin.Manager
 	Tokens  *app.TokenStore
+	Version string
 }
 
 func (s *Server) Handler() http.Handler {
@@ -26,6 +29,7 @@ func (s *Server) Handler() http.Handler {
 	staticFS, _ := fs.Sub(assets, "static")
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(staticFS))))
 	mux.HandleFunc("/api/health", s.health)
+	mux.HandleFunc("/api/about", s.about)
 	mux.HandleFunc("/api/auth-tokens", s.authTokens)
 	mux.HandleFunc("/api/auth-tokens/", s.authTokenAction)
 	mux.HandleFunc("/api/plugins", s.plugins)
@@ -47,7 +51,26 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(b)
 }
 func (s *Server) health(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, map[string]any{"ok": true, "version": "0.3.2", "mcpPath": "/mcp"})
+	writeJSON(w, map[string]any{"ok": true, "version": s.version(), "mcpPath": "/mcp"})
+}
+
+func (s *Server) about(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	writeJSON(w, map[string]any{
+		"currentVersion": s.version(),
+		"repository":     "https://github.com/wangzaifan/daoliyu-mcp-server",
+		"updateSource":   "fnOS 应用商店负责道理鱼 MCP 服务本体更新",
+	})
+}
+
+func (s *Server) version() string {
+	if s.Version != "" {
+		return s.Version
+	}
+	return "0.3.3"
 }
 
 func (s *Server) authTokens(w http.ResponseWriter, r *http.Request) {
@@ -107,6 +130,9 @@ type card struct {
 	Version     string `json:"version"`
 	Description string `json:"description"`
 	Icon        string `json:"icon"`
+	IconURL     string `json:"iconUrl"`
+	Repository  string `json:"repository,omitempty"`
+	Homepage    string `json:"homepage,omitempty"`
 	Enabled     bool   `json:"enabled"`
 	Builtin     bool   `json:"builtin"`
 }
@@ -123,7 +149,7 @@ func (s *Server) plugins(w http.ResponseWriter, r *http.Request) {
 	}
 	out := make([]card, 0, len(list))
 	for _, p := range list {
-		out = append(out, card{p.ID, p.Name, p.Version, p.Description, p.Icon, p.Enabled, p.Builtin})
+		out = append(out, card{p.ID, p.Name, p.Version, p.Description, p.Icon, "/api/plugins/" + p.ID + "/icon", p.Repository, p.Homepage, p.Enabled, p.Builtin})
 	}
 	writeJSON(w, out)
 }
@@ -147,11 +173,44 @@ func (s *Server) pluginAction(w http.ResponseWriter, r *http.Request) {
 		s.pluginStatus(w, r, id)
 		return
 	}
+	if len(parts) == 4 && parts[3] == "icon" {
+		s.pluginIcon(w, r, id)
+		return
+	}
 	if len(parts) == 3 && r.Method == http.MethodDelete {
 		s.uninstall(w, r, id)
 		return
 	}
 	http.Error(w, "method not allowed", 405)
+}
+
+func (s *Server) pluginIcon(w http.ResponseWriter, r *http.Request, id string) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	item, err := s.Plugins.Get(id)
+	if err != nil || item.Icon == "" {
+		http.NotFound(w, r)
+		return
+	}
+	name := filepath.Clean(item.Icon)
+	if filepath.IsAbs(name) || name == "." || name == ".." || strings.HasPrefix(name, ".."+string(os.PathSeparator)) {
+		http.NotFound(w, r)
+		return
+	}
+	file, err := os.Open(filepath.Join(item.Dir, name))
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	defer file.Close()
+	stat, err := file.Stat()
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	http.ServeContent(w, r, filepath.Base(name), stat.ModTime(), file)
 }
 
 func (s *Server) pluginStatus(w http.ResponseWriter, r *http.Request, id string) {

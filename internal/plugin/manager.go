@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	_ "image/png"
 	"io"
 	"log"
 	"net/http"
@@ -263,6 +265,12 @@ func (m *Manager) Install(r *http.Request) (Manifest, error) {
 	if err := manifest.Validate(); err != nil {
 		return Manifest{}, err
 	}
+	if manifest.Provider != "" {
+		return Manifest{}, fmt.Errorf("provider is reserved for built-in plugins")
+	}
+	if manifest.Icon == "" {
+		return Manifest{}, fmt.Errorf("plugin icon is required")
+	}
 	stage, err := os.MkdirTemp(m.Dir, ".stage-*")
 	if err != nil {
 		return Manifest{}, err
@@ -300,6 +308,11 @@ func (m *Manager) Install(r *http.Request) (Manifest, error) {
 			return Manifest{}, e
 		}
 	}
+	if manifest.Icon != "" {
+		if err := validateIcon(stage, manifest.Icon); err != nil {
+			return Manifest{}, err
+		}
+	}
 	dst := filepath.Join(m.Dir, manifest.ID)
 	preserved := filepath.Join(m.Dir, manifest.ID+".data")
 	dataDir := filepath.Join(dst, "data")
@@ -330,6 +343,32 @@ func (m *Manager) Install(r *http.Request) (Manifest, error) {
 		return Manifest{}, err
 	}
 	return manifest, nil
+}
+
+func validateIcon(root, name string) error {
+	clean := filepath.Clean(name)
+	if filepath.IsAbs(clean) || clean == "." || clean == ".." || strings.HasPrefix(clean, ".."+string(os.PathSeparator)) {
+		return fmt.Errorf("invalid plugin icon path")
+	}
+	if strings.ToLower(filepath.Ext(clean)) != ".png" {
+		return fmt.Errorf("plugin icon must be a PNG")
+	}
+	file, err := os.Open(filepath.Join(root, clean))
+	if err != nil {
+		return fmt.Errorf("plugin icon is required: %w", err)
+	}
+	defer file.Close()
+	if info, err := file.Stat(); err != nil || info.Size() > 512<<10 {
+		return fmt.Errorf("plugin icon must be at most 512 KiB")
+	}
+	config, _, err := image.DecodeConfig(file)
+	if err != nil {
+		return fmt.Errorf("invalid plugin icon: %w", err)
+	}
+	if config.Width != config.Height || config.Width < 64 || config.Width > 512 {
+		return fmt.Errorf("plugin icon must be square and between 64x64 and 512x512")
+	}
+	return nil
 }
 
 func readZipFile(f *zip.File, max int64) ([]byte, error) {

@@ -1,9 +1,9 @@
 appname=daoliyu.mcp
 micro_app=true
-version=0.3.2
+version=0.3.3
 display_name=道理鱼 MCP 服务
 desc=独立端口运行的 MCP 插件平台，支持本地插件和上游 Streamable HTTP MCP。
-changelog=配置页显示默认 MCP 地址并支持远程上游地址；收敛思源正式链路为 MCP 连接器，升级不清理应用数据。
+changelog=Token 页面隐藏中间字符并显示能力标签；插件卡片增加能力详情、外部链接和设置入口；第三方插件规则固定并补充作者指南。
 source=thirdparty
 platform=all
 os_min_version=1.0.0

@@ -5,6 +5,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"image"
+	"image/color"
+	"image/png"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -25,6 +28,29 @@ func TestManifestValidate(t *testing.T) {
 	}
 	if err := (Manifest{ID: "demo.http", Name: "x", Version: "1", Type: "mcp-http", Endpoint: "http://127.0.0.1/mcp"}).Validate(); err == nil {
 		t.Fatal("expected missing tool prefix to fail")
+	}
+	if err := (Manifest{ID: "demo.plugin", Name: "x", Version: "1", Repository: "javascript:alert(1)"}).Validate(); err == nil {
+		t.Fatal("expected invalid repository URL to fail")
+	}
+}
+
+func TestValidateIconRejectsInvalidDimensions(t *testing.T) {
+	d := t.TempDir()
+	path := filepath.Join(d, "icon.png")
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	img := image.NewRGBA(image.Rect(0, 0, 63, 64))
+	img.Set(0, 0, color.RGBA{A: 255})
+	if err := png.Encode(file, img); err != nil {
+		t.Fatal(err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := validateIcon(d, "icon.png"); err == nil || !strings.Contains(err.Error(), "square and between") {
+		t.Fatalf("err=%v", err)
 	}
 }
 
@@ -133,6 +159,39 @@ func TestExternalPluginReceivesItsConfig(t *testing.T) {
 	_ = serverSession.Wait()
 }
 
+func TestInstallRejectsReservedProvider(t *testing.T) {
+	d := t.TempDir()
+	m, err := NewManager(d, func(string) bool { return false }, func(string, bool) error { return nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+	var bundle bytes.Buffer
+	zw := zip.NewWriter(&bundle)
+	w, err := zw.Create("plugin.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = w.Write([]byte(`{"id":"demo.provider","name":"Demo","version":"1","provider":"siyuan"}`))
+	if err := zw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	var body bytes.Buffer
+	mw := multipart.NewWriter(&body)
+	part, err := mw.CreateFormFile("bundle", "plugin.zip")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = part.Write(bundle.Bytes())
+	if err := mw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest("POST", "/api/plugins", &body)
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+	if _, err := m.Install(req); err == nil || !strings.Contains(err.Error(), "provider is reserved") {
+		t.Fatalf("err=%v", err)
+	}
+}
+
 func TestPluginDataCanBePreservedRestoredOrPurged(t *testing.T) {
 	d := t.TempDir()
 	m, err := NewManager(d, func(string) bool { return true }, func(string, bool) error { return nil })
@@ -170,7 +229,15 @@ func installTestBundle(t *testing.T, manager *Manager, id string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, _ = w.Write([]byte(`{"id":"` + id + `","name":"Demo","version":"1"}`))
+	_, _ = w.Write([]byte(`{"id":"` + id + `","name":"Demo","version":"1","icon":"icon.png"}`))
+	iconFile, err := zw.Create("icon.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	icon := image.NewRGBA(image.Rect(0, 0, 64, 64))
+	if err := png.Encode(iconFile, icon); err != nil {
+		t.Fatal(err)
+	}
 	if err := zw.Close(); err != nil {
 		t.Fatal(err)
 	}

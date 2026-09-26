@@ -12,7 +12,9 @@ go run ./cmd/daoliyu-mcp -data ./data
 交叉打包：
 
 ```sh
-VERSION=0.3.2 ./scripts/build-fpk.sh
+VERSION=0.3.3 ./scripts/build-fpk.sh
 ```
+
+第三方能力包作者请阅读 [`plugin-author-guide.md`](plugin-author-guide.md)，并使用 `./scripts/package-plugin.sh <插件目录> <输出 ZIP>` 打包；本文件只描述道理鱼平台本身的构建。
 
 产物位于 `dist/<version>/`，生成 Sisyphus MCP connector ZIP；旧思源直连适配器源码不进入正式包。FPK 升级回调不清理 `${TRIM_PKGVAR}/data`，应用数据由 fnOS 持久目录承载，版本升级只替换程序文件。未在真实 x86/ARM fnOS 设备安装验证前，不把构建成功称为兼容性验证。

@@ -16,6 +16,8 @@ type Manifest struct {
 	Version      string          `json:"version"`
 	Description  string          `json:"description"`
 	Icon         string          `json:"icon"`
+	Repository   string          `json:"repository,omitempty"`
+	Homepage     string          `json:"homepage,omitempty"`
 	Type         string          `json:"type,omitempty"`
 	Entry        string          `json:"entry"`
 	Provider     string          `json:"provider"`
@@ -37,6 +39,15 @@ func (m Manifest) Validate() error {
 	}
 	if m.Name == "" || m.Version == "" {
 		return fmt.Errorf("plugin name and version are required")
+	}
+	for field, value := range map[string]string{"repository": m.Repository, "homepage": m.Homepage} {
+		if value == "" {
+			continue
+		}
+		u, err := url.Parse(value)
+		if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" || u.User != nil {
+			return fmt.Errorf("invalid %s URL", field)
+		}
 	}
 	if m.Type != "" && m.Type != "mcp-http" {
 		return fmt.Errorf("unsupported plugin type %q", m.Type)
