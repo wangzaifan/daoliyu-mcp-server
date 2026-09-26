@@ -1,0 +1,24 @@
+[
+  {
+    "stepTitle": "安装 思源笔记",
+    "items": [
+      {
+        "type": "text",
+        "field": "wizard_siyuan_port",
+        "label": "思源服务端口",
+        "initValue": "6806",
+        "helpText": "用于思源网页与 API 的独立端口，不经过飞牛统一网关。",
+        "rules": [
+          {"required": true, "message": "请输入端口号"},
+          {"pattern": "^[0-9]+$", "message": "端口号必须是数字"}
+        ]
+      },
+      {
+        "type": "password",
+        "field": "wizard_access_auth_code",
+        "label": "锁屏密码",
+        "helpText": "首次安装必须填写；重新安装且保留了配置时可留空继续使用原密码。API Token 需在思源设置中另行查看。"
+      }
+    ]
+  }
+]

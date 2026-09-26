@@ -1,0 +1,87 @@
+#!/bin/sh
+set -eu
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+# shellcheck disable=SC1091
+. "$SCRIPT_DIR/common"
+resolve_paths
+PID="${TRIM_PKGVAR}/siyuan.pid"
+LOG="${TRIM_PKGVAR}/siyuan.log"
+MCP_PID="${TRIM_PKGVAR}/sisyphus.pid"
+MCP_LOG="${TRIM_PKGVAR}/sisyphus.log"
+LOADER="${TRIM_APPDEST}/lib/ld-musl.so.1"
+KERNEL="${TRIM_APPDEST}/siyuan/kernel"
+NODE="${TRIM_APPDEST}/node/bin/node"
+MCP_LAUNCHER="${TRIM_APPDEST}/sisyphus-launcher.cjs"
+APP_USER=${TRIM_USERNAME:-daoliyu.siyuan}
+APP_GROUP=${TRIM_GROUPNAME:-daoliyu.siyuan}
+
+case "${1:-status}" in
+  start)
+    if [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null; then
+      if [ -f "$MCP_PID" ] && kill -0 "$(cat "$MCP_PID")" 2>/dev/null; then exit 0; fi
+      stale_pid=$(cat "$PID")
+      kill "$stale_pid" 2>/dev/null || true
+      i=0
+      while kill -0 "$stale_pid" 2>/dev/null && [ "$i" -lt 20 ]; do sleep 1; i=$((i+1)); done
+      kill -9 "$stale_pid" 2>/dev/null || true
+      rm -f "$PID" "$MCP_PID"
+    fi
+    if [ -f "$MCP_PID" ]; then
+      kill "$(cat "$MCP_PID")" 2>/dev/null || true
+      rm -f "$MCP_PID"
+    fi
+    [ "$(id -u)" -eq 0 ] || { echo "SiYuan startup requires the FPK root lifecycle context" >&2; exit 1; }
+    mkdir -p "$SIYUAN_WORKSPACE" "$SIYUAN_CONFIG/home" "$TRIM_PKGVAR"
+    port=$(cat "$PORT_FILE" 2>/dev/null || printf '%s' "${TRIM_SERVICE_PORT:-6806}")
+    auth=$(cat "$AUTH_FILE" 2>/dev/null || true)
+    valid_port "$port" || { echo "invalid SiYuan port" >&2; exit 1; }
+    [ -n "$auth" ] || { echo "SiYuan access auth code is missing" >&2; exit 1; }
+    current_home=$(getent passwd "$APP_USER" | cut -d: -f6)
+    [ -n "$current_home" ] || { echo "SiYuan package user is missing" >&2; exit 1; }
+    if [ "$current_home" != "$SIYUAN_CONFIG/home" ]; then
+      usermod -d "$SIYUAN_CONFIG/home" "$APP_USER"
+    fi
+    chown "$APP_USER:$APP_GROUP" "$SIYUAN_WORKSPACE" "$SIYUAN_CONFIG" "$SIYUAN_CONFIG/home" "$TRIM_PKGVAR"
+    uid=$(id -u "$APP_USER")
+    gid=$(id -g "$APP_USER")
+    export HOME="$SIYUAN_CONFIG/home"
+    export RUN_IN_CONTAINER=true
+    export SSL_CERT_FILE="${TRIM_APPDEST}/etc/ssl/certs/ca-certificates.crt"
+    export ZONEINFO="${TRIM_APPDEST}/zoneinfo.zip"
+    export SIYUAN_ACCESS_AUTH_CODE="$auth"
+    nohup setpriv --reuid="$uid" --regid="$gid" --init-groups \
+      "$LOADER" --library-path "${TRIM_APPDEST}/lib" "$KERNEL" serve \
+      --workspace="$SIYUAN_WORKSPACE" --port="$port" \
+      --lang=zh-CN --wd="${TRIM_APPDEST}/siyuan" >>"$LOG" 2>&1 &
+    echo $! > "$PID"
+    kernel_pid=$(cat "$PID")
+    nohup setpriv --reuid="$uid" --regid="$gid" --init-groups \
+      "$LOADER" --library-path "${TRIM_APPDEST}/lib" "$NODE" \
+      "$MCP_LAUNCHER" "$SIYUAN_WORKSPACE" "$kernel_pid" "$port" >>"$MCP_LOG" 2>&1 &
+    echo $! > "$MCP_PID"
+    sleep 2
+    if ! kill -0 "$(cat "$MCP_PID")" 2>/dev/null; then
+      kill "$kernel_pid" 2>/dev/null || true
+      rm -f "$PID" "$MCP_PID"
+      echo "Sisyphus MCP failed to start; see $MCP_LOG" >&2
+      exit 1
+    fi
+    ;;
+  stop)
+    for pid_file in "$MCP_PID" "$PID"; do
+      [ -f "$pid_file" ] || continue
+      pid=$(cat "$pid_file")
+      kill "$pid" 2>/dev/null || true
+      i=0
+      while kill -0 "$pid" 2>/dev/null && [ "$i" -lt 20 ]; do sleep 1; i=$((i+1)); done
+      kill -9 "$pid" 2>/dev/null || true
+      rm -f "$pid_file"
+    done
+    ;;
+  status)
+    if [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null && \
+       [ -f "$MCP_PID" ] && kill -0 "$(cat "$MCP_PID")" 2>/dev/null; then exit 0; fi
+    exit 3
+    ;;
+  *) echo "usage: $0 {start|stop|status}" >&2; exit 2;;
+esac

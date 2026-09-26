@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eu
+APP="${TRIM_APPDEST}/server/daoliyu-mcp"
+PID="${TRIM_PKGVAR}/app.pid"
+LOG="${TRIM_PKGVAR}/app.log"
+PORT_FILE="${TRIM_PKGVAR}/port"
+case "${1:-status}" in
+  start)
+    if [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null; then exit 0; fi
+    export DAOLIYU_MCP_DATA="${TRIM_PKGVAR}/data"
+    export DAOLIYU_MCP_BIND="0.0.0.0"
+    mkdir -p "$TRIM_PKGVAR/data"
+    PORT="$(cat "$PORT_FILE" 2>/dev/null || printf '%s' "${TRIM_SERVICE_PORT:-37421}")"
+    nohup "$APP" -port "$PORT" >>"$LOG" 2>&1 & echo $! >"$PID"
+    ;;
+  stop)
+    if [ -f "$PID" ]; then kill "$(cat "$PID")" 2>/dev/null || true; rm -f "$PID"; fi
+    ;;
+  status)
+    if [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null; then exit 0; fi
+    exit 3
+    ;;
+  *) echo "usage: $0 {start|stop|status}" >&2; exit 2;;
+esac

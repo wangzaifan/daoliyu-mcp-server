@@ -1,0 +1,8 @@
+[
+  {
+    "stepTitle": "卸载 道理鱼 MCP 服务",
+    "items": [
+      {"type": "select", "field": "wizard_uninstall_data", "label": "数据处理", "initValue": "keep", "options": [{"label": "保留插件、配置和 Token（推荐）", "value": "keep"}, {"label": "彻底清除全部应用数据", "value": "clear"}], "helpText": "保留后重新安装或升级会自动恢复；彻底清除不可恢复。"}
+    ]
+  }
+]

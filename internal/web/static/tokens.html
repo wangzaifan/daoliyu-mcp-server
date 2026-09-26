@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Token 管理 - 道理鱼 MCP 服务</title><link rel="stylesheet" href="/assets/style.css"></head>
+<body>
+<main class="shell token-shell">
+  <header><div class="brand"><img src="/assets/icon.png" alt="道理鱼"><div><h1>Token 管理</h1><p>道理鱼 MCP 服务</p></div></div><div class="actions"><a class="button" href="/">返回插件</a></div></header>
+  <section class="notice" id="notice"></section>
+  <section class="token-intro"><h2>调用说明</h2><p>本页就是管理入口。插件的启用、停用、配置、卸载，以及 Token 的创建和删除，都直接在当前后台操作，不需要额外密钥。</p><p>调用地址：<code id="mcpEndpoint"></code></p><p>调用方式：<code>Authorization: Bearer &lt;调用 Token&gt;</code></p><p class="muted">下面列表中的调用 Token 是 ChatGPT 等客户端唯一需要使用的凭据。</p></section>
+  <section class="token-toolbar"><div><h2>已创建 Token</h2><p class="muted">Token 会完整显示在列表中，可随时复制或删除。</p></div><button id="openCreateToken" type="button">创建 Token</button></section>
+  <div id="tokenList" class="token-list"></div>
+</main>
+<dialog id="createTokenDialog"><form id="tokenSettings" method="dialog"><div class="dialog-head"><div><h2>创建 Token</h2><p class="muted">选择这个 Token 可以调用哪些已启用插件。</p></div><button class="icon-button" id="closeCreateToken" type="button" aria-label="关闭">×</button></div><label>备注名称<input name="name" required maxlength="80" placeholder="例如：ChatGPT 思源"></label><label>允许调用的插件<select name="scopeMode" id="scopeMode"><option value="all">全部已启用插件</option><option value="selected">指定插件</option></select></label><label id="pluginScopeWrap" hidden>指定插件<select id="pluginScopes" name="pluginScopes" multiple size="5"></select><small>只显示当前已安装且已启用的插件；停用或卸载后不能作为新 Token 的授权范围。</small></label><div class="dialog-actions"><button id="cancelCreateToken" type="button">取消</button><button class="primary" type="submit">生成并复制</button></div></form></dialog>
+<script src="/assets/tokens.js"></script>
+</body></html>

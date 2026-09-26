@@ -1,0 +1,18 @@
+[
+  {
+    "stepTitle": "安装 道理鱼 MCP 服务",
+    "items": [
+      {
+        "type": "text",
+        "field": "wizard_app_port",
+        "label": "MCP 服务端口",
+        "initValue": "37421",
+        "helpText": "用于 MCP 和管理页面的独立端口，不经过飞牛统一网关；已有应用数据会自动保留。",
+        "rules": [
+          {"required": true, "message": "请输入端口号"},
+          {"pattern": "^[0-9]+$", "message": "端口号必须是数字"}
+        ]
+      }
+    ]
+  }
+]

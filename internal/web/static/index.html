@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>道理鱼 MCP 服务</title><link rel="stylesheet" href="/assets/style.css"><link rel="stylesheet" href="/assets/layout.css"><link rel="stylesheet" href="/assets/config.css"></head>
+<body>
+<main class="shell">
+  <header><div class="brand"><img src="/assets/icon.png" alt="道理鱼"><div><h1>道理鱼 MCP 服务</h1><p>独立端口 · 可插拔 MCP 平台</p></div></div><div class="actions"><a class="button" href="/tokens">Token 管理</a><button id="uploadBtn">安装插件包</button></div></header>
+  <section class="notice" id="notice"></section>
+  <section class="toolbar"><div><h2>MCP 接入</h2><p class="muted">这里管理接入道理鱼的 MCP 连接；思源本体仍在思源 FPK 内安装和运行。</p></div><span id="tokenHint" class="muted"></span></section>
+  <section id="cards" class="cards"></section>
+</main>
+<dialog id="pluginDialog"><div class="panel"><div class="panel-head"><div><h2 id="pluginConfigTitle">插件配置</h2><p id="pluginConfigHelp">配置保存在该插件自己的命名空间内。</p></div><button type="button" id="closePlugin">关闭</button></div><form id="pluginSettings"></form></div></dialog>
+<dialog id="toolDialog"><div class="panel"><div class="panel-head"><div><h2 id="toolDialogTitle">工具清单</h2><p id="toolDialogSummary">检查插件当前公开的 MCP 工具。</p></div><button type="button" id="closeTools">关闭</button></div><div id="toolList" class="tool-list"></div></div></dialog>
+<input id="file" type="file" accept=".zip" hidden>
+<script src="/assets/app.js"></script>
+</body></html>

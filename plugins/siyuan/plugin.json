@@ -1,0 +1,26 @@
+{
+  "id": "siyuan",
+  "name": "思源知识库",
+  "version": "0.2.0",
+  "description": "通过思源官方 API 提供检索、沉淀、分类和关联能力，可独立停用和卸载。",
+  "icon": "icon.png",
+  "provider": "siyuan",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "baseURL": {"type": "string", "title": "思源地址", "default": "http://127.0.0.1:6806"},
+      "token": {"type": "string", "title": "API Token", "format": "password"}
+    },
+    "required": ["baseURL"]
+  },
+  "tools": [
+    {"name": "siyuan_health", "description": "检查思源内核是否可访问"},
+    {"name": "siyuan_list_notebooks", "description": "列出思源笔记本"},
+    {"name": "siyuan_search", "description": "在思源文档块内容中搜索文本"},
+    {"name": "siyuan_get_document", "description": "按文档 ID 导出 Markdown 内容"},
+    {"name": "siyuan_create_document", "description": "在指定笔记本创建 Markdown 文档"},
+    {"name": "siyuan_kb_schema", "description": "返回 AI 知识库分类、类型和目录约定"},
+    {"name": "siyuan_kb_capture", "description": "按统一分类和元数据模板沉淀知识"},
+    {"name": "siyuan_kb_search", "description": "检索知识并返回稳定引用和元数据"}
+  ]
+}

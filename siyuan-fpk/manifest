@@ -1,0 +1,17 @@
+appname=daoliyu.siyuan
+micro_app=true
+version=3.8.4-0003
+display_name=思源笔记
+desc=独立端口运行的思源笔记服务，内置仅监听本机的 Sisyphus MCP，工作空间持久保存。
+changelog=增加 Node 运行时与 Sisyphus 0.6.7 本机 MCP sidecar，供道理鱼 MCP 插件安全转发。
+source=thirdparty
+platform=all
+os_min_version=1.0.0
+maintainer=汪仔饭
+maintainer_url=https://daoliyu.cn
+distributor=汪仔饭
+distributor_url=https://daoliyu.cn
+desktop_uidir=ui
+desktop_applaunchname=daoliyu.siyuan.main
+service_port=6806
+checkport=false

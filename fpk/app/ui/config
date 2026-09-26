@@ -1,0 +1,13 @@
+{
+  ".url": {
+    "daoliyu.mcp.main": {
+      "title": "道理鱼 MCP 服务",
+      "icon": "images/icon_{0}.png",
+      "type": "url",
+      "protocol": "http",
+      "port": "${wizard_app_port}",
+      "url": "/",
+      "allUsers": true
+    }
+  }
+}

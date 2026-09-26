@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+[ "${wizard_uninstall_data:-keep}" = "clear" ] || exit 0
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+# shellcheck disable=SC1091
+. "$SCRIPT_DIR/common"
+resolve_paths
+for target in "$SIYUAN_WORKSPACE" "$SIYUAN_CONFIG"; do
+  case "$target" in
+    */daoliyu.siyuan/workspace|*/daoliyu.siyuan/config|*/share/workspace|*/share/config) ;;
+    *) printf '拒绝清除异常路径：%s\n' "$target" >&2; exit 1;;
+  esac
+  [ -d "$target" ] || continue
+  find "$target" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+done

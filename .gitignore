@@ -1,0 +1,22 @@
+# Local and generated files
+.DS_Store
+Thumbs.db
+data/
+build/
+dist/
+*.fpk
+*.tmp
+*.log
+
+# Local credentials and environment files
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.pub
+
+# Local screenshots and exports
+Codex 图像 *.png

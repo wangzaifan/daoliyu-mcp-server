@@ -1,0 +1,18 @@
+[
+  {
+    "stepTitle": "卸载 思源笔记",
+    "items": [
+      {
+        "type": "select",
+        "field": "wizard_uninstall_data",
+        "label": "数据处理",
+        "initValue": "keep",
+        "options": [
+          {"label": "保留工作空间和配置（推荐）", "value": "keep"},
+          {"label": "彻底清除全部笔记和配置", "value": "clear"}
+        ],
+        "helpText": "保留后重新安装会自动恢复；彻底清除不可恢复，请先备份。"
+      }
+    ]
+  }
+]

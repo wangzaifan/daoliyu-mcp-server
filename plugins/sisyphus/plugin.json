@@ -1,0 +1,26 @@
+{
+  "id": "sisyphus",
+  "name": "思源 MCP 连接",
+  "version": "0.6.7",
+  "description": "连接思源内已安装的 Sisyphus MCP；本卡只负责工具发现、转发和道理鱼 Token 授权，不重复安装思源。",
+  "icon": "icon.png",
+  "type": "mcp-http",
+  "endpoint": "http://127.0.0.1:36806/mcp",
+  "toolPrefix": "siyuan_",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "endpoint": {
+        "type": "string",
+        "title": "MCP 地址",
+        "default": "http://127.0.0.1:36806/mcp"
+      },
+      "token": {
+        "type": "string",
+        "title": "上游 Bearer Token（本机 sidecar 留空）",
+        "format": "password"
+      }
+    }
+  },
+  "tools": []
+}

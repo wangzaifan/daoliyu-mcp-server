@@ -1,0 +1,3 @@
+#!/bin/sh
+# Application data lives in the fnOS persistent package directory; upgrades only replace code.
+exit 0

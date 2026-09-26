@@ -1,0 +1,26 @@
+#!/bin/sh
+
+resolve_paths() {
+  SIYUAN_WORKSPACE=""
+  SIYUAN_CONFIG=""
+  old_ifs=$IFS
+  IFS=:
+  for data_path in ${TRIM_DATA_SHARE_PATHS:-}; do
+    case "${data_path%/}" in
+      */workspace) SIYUAN_WORKSPACE="${data_path%/}" ;;
+      */config) SIYUAN_CONFIG="${data_path%/}" ;;
+    esac
+  done
+  IFS=$old_ifs
+  SIYUAN_WORKSPACE=${SIYUAN_WORKSPACE:-/var/apps/daoliyu.siyuan/share/workspace}
+  SIYUAN_CONFIG=${SIYUAN_CONFIG:-/var/apps/daoliyu.siyuan/share/config}
+  # shellcheck disable=SC2034
+  PORT_FILE="$SIYUAN_CONFIG/port"
+  # shellcheck disable=SC2034
+  AUTH_FILE="$SIYUAN_CONFIG/access-auth-code"
+}
+
+valid_port() {
+  case "${1:-}" in (''|*[!0-9]*) return 1;; esac
+  [ "$1" -ge 1 ] && [ "$1" -le 65535 ]
+}

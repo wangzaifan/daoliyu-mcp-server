@@ -1,0 +1,3 @@
+#!/bin/sh
+# Workspace and config are data-share mounts; upgrades must not touch either one.
+exit 0

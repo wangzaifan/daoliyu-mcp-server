@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+port="${wizard_app_port:-37421}"
+case "$port" in (*[!0-9]*|'') exit 1;; esac
+if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then exit 1; fi
+mkdir -p "${TRIM_PKGVAR}"
+printf '%s\n' "$port" > "${TRIM_PKGVAR}/port"
+chmod 600 "${TRIM_PKGVAR}/port"
