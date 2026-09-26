@@ -40,6 +40,17 @@ if icon:
         raise SystemExit("icon must be square and between 64x64 and 512x512")
 if manifest.get("provider"):
     raise SystemExit("provider is reserved for built-in plugins")
+assets = manifest.get("assets", [])
+if not isinstance(assets, list) or any(not isinstance(item, str) for item in assets):
+    raise SystemExit("assets must be a list of relative file paths")
+for asset in assets:
+    asset_path = (root / asset).resolve()
+    try:
+        asset_path.relative_to(root.resolve())
+    except ValueError:
+        raise SystemExit("asset must stay inside the plugin directory")
+    if not asset_path.is_file():
+        raise SystemExit(f"asset is missing: {asset}")
 PY
 
 mkdir -p "$(dirname "$OUT")"
@@ -60,8 +71,19 @@ if entry.is_file():
 icon = root / manifest["icon"] if manifest.get("icon") else None
 if icon and icon.is_file():
     files.append(icon)
+for asset in manifest.get("assets", []):
+    path = root / asset
+    if path.is_file():
+        files.append(path)
+unique = []
+seen = set()
+for path in files:
+    key = path.resolve()
+    if key not in seen:
+        seen.add(key)
+        unique.append(path)
 with zipfile.ZipFile(out, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
-    for path in files:
+    for path in unique:
         bundle.write(path, path.relative_to(root).as_posix())
 PY
 unzip -t "$OUT" >/dev/null

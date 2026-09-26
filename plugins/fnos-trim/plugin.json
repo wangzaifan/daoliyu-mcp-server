@@ -1,0 +1,50 @@
+{
+  "id": "fnos.trim-cli",
+  "name": "fnOS 管理工具",
+  "version": "0.1.0",
+  "description": "基于 fnOS trim-cli V2 的 NAS 查询连接器，支持登录、系统、文件、应用、Docker、下载、存储、照片和媒体查询。",
+  "icon": "icon.png",
+  "repository": "https://github.com/wangzaifan/daoliyu-mcp-server",
+  "homepage": "https://github.com/techysy/fnos-trim-cli-skill",
+  "entry": "plugin",
+  "assets": ["bin/trim-cli"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "host": { "type": "string", "title": "fnOS 地址", "default": "127.0.0.1" },
+      "port": { "type": "integer", "title": "WebSocket 端口", "default": 5666 },
+      "profile": { "type": "string", "title": "会话名称", "default": "default" },
+      "scheme": { "type": "string", "title": "连接协议", "enum": ["auto", "ws", "wss"], "default": "auto" },
+      "allowInsecureWs": { "type": "boolean", "title": "允许远程明文 WS", "default": false },
+      "tlsInsecure": { "type": "boolean", "title": "跳过 WSS 证书校验", "default": false }
+    }
+  },
+  "tools": [
+    { "name": "fnos_login", "description": "登录并在插件数据目录保存会话", "inputSchema": { "type": "object", "properties": { "username": { "type": "string" }, "password": { "type": "string", "format": "password" }, "totpCode": { "type": "string" } }, "required": ["username", "password"] } },
+    { "name": "fnos_logout", "description": "退出当前 fnOS 会话", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_status", "description": "汇总系统、CPU、内存和存储状态", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_system_info", "description": "查看 fnOS 机器和系统信息", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_monitor_cpu", "description": "查看 CPU 使用率", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_monitor_memory", "description": "查看内存使用率", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_file_list", "description": "列出 fnOS 文件目录", "inputSchema": { "type": "object", "properties": { "path": { "type": "string", "description": "可选的 /vol... 路径" } } } },
+    { "name": "fnos_file_search", "description": "搜索文件", "inputSchema": { "type": "object", "properties": { "key": { "type": "string" }, "paths": { "type": "array", "items": { "type": "string" } } }, "required": ["key"] } },
+    { "name": "fnos_file_info", "description": "查看文件属性、大小或下载地址", "inputSchema": { "type": "object", "properties": { "path": { "type": "string" }, "mode": { "type": "string", "enum": ["prop", "size", "download-url"], "default": "prop" } }, "required": ["path"] } },
+    { "name": "fnos_app_list", "description": "列出已安装应用", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_app_status", "description": "查看指定应用状态", "inputSchema": { "type": "object", "properties": { "app": { "type": "string" } }, "required": ["app"] } },
+    { "name": "fnos_app_check_update", "description": "检查应用中心更新", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_docker_containers", "description": "列出 Docker 容器", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_docker_stats", "description": "查看 Docker 汇总统计", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_download_list", "description": "列出或按关键字搜索下载任务", "inputSchema": { "type": "object", "properties": { "keyword": { "type": "string" } } } },
+    { "name": "fnos_download_info", "description": "查看下载任务详情", "inputSchema": { "type": "object", "properties": { "id": { "type": "integer", "minimum": 1 } }, "required": ["id"] } },
+    { "name": "fnos_download_stat", "description": "查看下载中心统计", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_storage_overview", "description": "查看存储总览", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_storage_pools", "description": "列出存储池", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_storage_disks", "description": "列出磁盘", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_storage_health", "description": "查看磁盘健康状态", "inputSchema": { "type": "object", "properties": { "disk": { "type": "string" } }, "required": ["disk"] } },
+    { "name": "fnos_storage_smart", "description": "查看磁盘 SMART 信息", "inputSchema": { "type": "object", "properties": { "disk": { "type": "string" } }, "required": ["disk"] } },
+    { "name": "fnos_photos_search", "description": "搜索照片", "inputSchema": { "type": "object", "properties": { "query": { "type": "string" }, "limit": { "type": "integer", "minimum": 1, "maximum": 100 } }, "required": ["query"] } },
+    { "name": "fnos_photos_info", "description": "查看照片详情", "inputSchema": { "type": "object", "properties": { "photoId": { "type": "integer", "minimum": 1 } }, "required": ["photoId"] } },
+    { "name": "fnos_media_stats", "description": "查看影视库统计", "inputSchema": { "type": "object", "properties": {} } },
+    { "name": "fnos_media_search", "description": "搜索影视条目", "inputSchema": { "type": "object", "properties": { "query": { "type": "string" } }, "required": ["query"] } }
+  ]
+}
